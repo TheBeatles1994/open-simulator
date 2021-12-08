@@ -98,7 +98,7 @@ spec:
 
 运行效果图：
 
-![](doc/../docs/images/simon.png)
+![](https://open-cluster-management.oss-us-west-1.aliyuncs.com/demo.gif)
 
 ## 许可证
 
