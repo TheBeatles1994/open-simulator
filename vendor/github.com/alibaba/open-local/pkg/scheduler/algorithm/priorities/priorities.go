@@ -18,8 +18,9 @@ package priorities
 
 import (
 	"github.com/alibaba/open-local/pkg/scheduler/algorithm"
-	log "github.com/sirupsen/logrus"
+	"github.com/alibaba/open-local/pkg/utils"
 	corev1 "k8s.io/api/core/v1"
+	log "k8s.io/klog/v2"
 	schedulerapi "k8s.io/kube-scheduler/extender/v1"
 )
 
@@ -53,6 +54,10 @@ func (p Prioritize) Handler(args schedulerapi.ExtenderArgs) (*schedulerapi.HostP
 		}
 	}
 	hostPriorityList := InitHostPriorityList(nodeNames)
+	if len(p.Ctx.NodeAntiAffinityWeight.Items(false)) == 0 && utils.NeedSkip(args) {
+		log.Infof("priorities: skip pod %s/%s scheduling", pod.Namespace, pod.Name)
+		return &hostPriorityList, nil
+	}
 
 	for _, pri := range p.PrioritizeFuncs {
 		for i, nodeName := range nodeNames {

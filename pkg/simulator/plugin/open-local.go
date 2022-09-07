@@ -8,7 +8,6 @@ import (
 	localtype "github.com/alibaba/open-local/pkg"
 	localalgorithm "github.com/alibaba/open-local/pkg/scheduler/algorithm"
 	localalgo "github.com/alibaba/open-local/pkg/scheduler/algorithm/algo"
-	localpriorities "github.com/alibaba/open-local/pkg/scheduler/algorithm/priorities"
 	"github.com/pquerna/ffjson/ffjson"
 	log "github.com/sirupsen/logrus"
 	corev1 "k8s.io/api/core/v1"
@@ -103,7 +102,7 @@ func (plugin *LocalPlugin) Score(ctx context.Context, state *framework.CycleStat
 	// check if the node have storage resources
 	nc, err := utils.GetNodeCache(node)
 	if err != nil {
-		return int64(localpriorities.MinScore), framework.NewStatus(framework.Error, err.Error())
+		return int64(localalgo.MinScore), framework.NewStatus(framework.Error, err.Error())
 	} else if nc == nil {
 		nodeExist = false
 	}
@@ -112,10 +111,10 @@ func (plugin *LocalPlugin) Score(ctx context.Context, state *framework.CycleStat
 	// MinScore: pod doesn't require storage resources
 	// Unschedulable: node doesn't have storage resources but pod requires storage resources
 	if !podExist {
-		return int64(localpriorities.MinScore), framework.NewStatus(framework.Success)
+		return int64(localalgo.MinScore), framework.NewStatus(framework.Success)
 	}
 	if !nodeExist {
-		return int64(localpriorities.MinScore), framework.NewStatus(framework.Unschedulable, fmt.Sprintf("no local storage found in node %s", node.Name))
+		return int64(localalgo.MinScore), framework.NewStatus(framework.Unschedulable, fmt.Sprintf("no local storage found in node %s", node.Name))
 	}
 
 	// create SchedulingContext
@@ -125,13 +124,13 @@ func (plugin *LocalPlugin) Score(ctx context.Context, state *framework.CycleStat
 	// process Open-Local LVM
 	score1, _, err := localalgo.ScoreLVMVolume(nil, lvmPVCs, node, schedulingContext)
 	if err != nil {
-		return int64(localpriorities.MinScore), framework.NewStatus(framework.Error, err.Error())
+		return int64(localalgo.MinScore), framework.NewStatus(framework.Error, err.Error())
 	}
 
 	// process Open-Local Device
 	score2, _, err := localalgo.ScoreDeviceVolume(nil, devicePVCs, node, schedulingContext)
 	if err != nil {
-		return int64(localpriorities.MinScore), framework.NewStatus(framework.Error, err.Error())
+		return int64(localalgo.MinScore), framework.NewStatus(framework.Error, err.Error())
 	}
 
 	return int64(score1 + score2), framework.NewStatus(framework.Success)

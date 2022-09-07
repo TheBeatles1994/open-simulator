@@ -57,6 +57,7 @@ type NodeLocalStorageSpec struct {
 	// +kubebuilder:validation:MaxLength=128
 	// +kubebuilder:validation:MinLength=1
 	NodeName           string             `json:"nodeName,omitempty"`
+	SpdkConfig         SpdkConfig         `json:"spdkConfig,omitempty"`
 	ListConfig         ListConfig         `json:"listConfig,omitempty"`
 	ResourceToBeInited ResourceToBeInited `json:"resourceToBeInited,omitempty"`
 }
@@ -67,6 +68,18 @@ type NodeLocalStorageStatus struct {
 	// Important: Run "make" to regenerate code after modifying this file
 	NodeStorageInfo     NodeStorageInfo     `json:"nodeStorageInfo,omitempty"`
 	FilteredStorageInfo FilteredStorageInfo `json:"filteredStorageInfo,omitempty"`
+}
+
+// SpdkConfig defines SPDK configuration
+type SpdkConfig struct {
+	// DeviceType is the type of SPDK block devices
+	// +kubebuilder:validation:MaxLength=8
+	// +kubebuilder:validation:MinLength=0
+	DeviceType string `json:"deviceType,omitempty"`
+	// RpcSocket is the unix domain socket for SPDK RPC
+	// +kubebuilder:validation:MaxLength=128
+	// +kubebuilder:validation:MinLength=0
+	RpcSocket string `json:"rpcSocket,omitempty"`
 }
 
 type ListConfig struct {
@@ -177,7 +190,7 @@ var (
 )
 
 type UpdateStatusInfo struct {
-	LastUpdateTime metav1.Time  `json:"lastUpdateTime,omitempty"`
+	LastUpdateTime *metav1.Time `json:"lastUpdateTime,omitempty"`
 	Status         UpdateStatus `json:"updateStatus,omitempty"`
 	Reason         string       `json:"reason,omitempty"`
 }
@@ -309,9 +322,9 @@ type StorageState struct {
 	Type   StorageConditionType `json:"type,omitempty"`
 	Status ConditionStatus      `json:"status,omitempty"`
 	// +optional
-	LastHeartbeatTime metav1.Time `json:"lastHeartbeatTime,omitempty"`
+	LastHeartbeatTime *metav1.Time `json:"lastHeartbeatTime,omitempty"`
 	// +optional
-	LastTransitionTime metav1.Time `json:"lastTransitionTime,omitempty"`
+	LastTransitionTime *metav1.Time `json:"lastTransitionTime,omitempty"`
 	// +optional
 	Reason string `json:"reason,omitempty"`
 	// +optional
